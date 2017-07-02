@@ -15,7 +15,7 @@ module Rack
       :state,   # the request's current state, see VALID_STATES below
     ) do
       def ms(k) # helper method used for formatting values in milliseconds
-        '%.fms'.format(self[k] * 1000) if self[k]
+        '%.fms' % (self[k] * 1000) if self[k]
       end
     end
     VALID_STATES = %i[ready active timed_out completed].freeze
