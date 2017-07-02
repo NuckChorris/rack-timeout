@@ -52,6 +52,7 @@ module Rack
 
     RT = self # shorthand reference
     def call(env)
+      Raven.rack_context(env)
       # Generate our RequestDetails
       info = (env[ENV_INFO_KEY] ||= RequestDetails.new)
       # Set the request ID
