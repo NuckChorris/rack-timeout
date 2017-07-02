@@ -52,7 +52,6 @@ module Rack
 
     RT = self # shorthand reference
     def call(env)
-      Raven.rack_context(env)
       # Generate our RequestDetails
       info = (env[ENV_INFO_KEY] ||= RequestDetails.new)
       # Set the request ID
@@ -79,7 +78,7 @@ module Rack
         # Update status
         RT._set_state!(env, status)
       end
-      # Start updating ever ysecond while active
+      # Start updating every second while active
       heartbeat_event = RT::Scheduler.run_every(1) do
         register_state_change.call(:active)
       end
@@ -90,12 +89,13 @@ module Rack
         register_state_change.call(:timed_out)
         req = ::Rack::Request.new(env)
         # Send it to Sentry
+        Raven.rack_context(env)
         Raven.capture_message(
           'Request Timed Out',
           fingerprint: [
             'Rack::Timeout',
             req.request_method,
-            req.script_name
+            req.path
           ].map(&:to_s),
           level: :error,
           backtrace: app_thread.backtrace
